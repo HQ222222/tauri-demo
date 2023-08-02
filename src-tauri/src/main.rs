@@ -1,11 +1,9 @@
 
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
+    all(not(debug_assertions)),
     windows_subsystem = "windows"
 )]
-// use std::process::{Command, Stdio};
 use std::os::windows::process::CommandExt;
-// use tauri::Manager;
 
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -14,6 +12,9 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! 你已经打开了新世界的大门!", name)
 }
 
+
+
+#[cfg(target_os = "windows")]
 #[tauri::command]
 async fn run_powershell_command(command: String) -> Result<String, String> {
     let output = std::process::Command::new("powershell.exe")
@@ -28,6 +29,31 @@ async fn run_powershell_command(command: String) -> Result<String, String> {
     }
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
+
+
+
+#[cfg(target_os = "macos")]
+#[tauri::command]
+async fn run_powershell_command(command: String) -> Result<String, String> {
+   
+    let stderr = "不支持macos";
+    if !stderr.is_empty() {
+        return Err(stderr.to_string());
+    }
+    Ok(stderr.to_string())
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
+fn other_platform_code() {
+    // 在其他平台上执行的代码
+    let stderr = "不支持此平台";
+    if !stderr.is_empty() {
+        return Err(stderr.to_string());
+    }
+    Ok(stderr.to_string())
+}
+
+
 
 fn main() {    
     tauri::Builder::default()
